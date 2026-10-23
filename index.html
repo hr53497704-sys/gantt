@@ -12,7 +12,7 @@
 :root{
   --brand:#1f3a5f; --brand-2:#2c5282; --accent:#e67e22; --bg:#f4f6f9; --card:#ffffff;
   --line:#dfe4ea; --line-2:#eef1f5; --text:#1d2733; --muted:#6b7785; --danger:#c0392b;
-  --today:#e53935; --hol:#fde7d3; --hol-text:#c0560c; --row-h:30px; --left-w:600px;
+  --today:#e53935; --hol:#fde7d3; --hol-text:#c0560c; --row-h:30px; --left-w:654px;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -55,7 +55,7 @@ header .sp{flex:1}
 .tier.y div{font-weight:700;color:var(--text);justify-content:flex-start;padding-left:6px}
 .tier div.hol{background:var(--hol);color:var(--hol-text);font-weight:700}
 .tier div.cur{background:#e3ecf8;color:var(--brand);font-weight:700}
-.c-no{width:40px;text-align:center}.c-wo{width:62px}.c-cu{width:64px}.c-si{width:58px}.c-eq{flex:1}.c-sh{width:96px}.c-fi{width:96px}
+.c-no{width:40px;text-align:center}.c-wo{width:62px}.c-cu{width:64px}.c-si{width:58px}.c-eq{flex:1}.c-sh{width:96px}.c-fi{width:96px}.c-dy{width:54px;text-align:right;padding-right:10px!important}
 .rows{position:relative}
 .grid{position:absolute;top:0;bottom:0;pointer-events:none}
 .grid div{position:absolute;top:0;bottom:0;border-left:1px solid var(--line-2)}
@@ -66,7 +66,7 @@ header .sp{flex:1}
 .row{display:flex;height:var(--row-h);border-bottom:1px solid var(--line-2);cursor:pointer}
 .row:hover .lrow,.row:hover .tl{background:#f3f7fd}
 .lrow{position:sticky;left:0;z-index:4;width:var(--left-w);flex:none;display:flex;align-items:center;background:#fff;border-right:2px solid var(--line);font-size:13px}
-.lrow .c-sh,.lrow .c-fi{font-variant-numeric:tabular-nums;color:#3b4652}
+.lrow .c-sh,.lrow .c-fi,.lrow .c-dy{font-variant-numeric:tabular-nums;color:#3b4652}
 .row.past .lrow{color:#9aa4b0}
 .tl{position:relative;flex:none}
 .bar{position:absolute;top:5px;height:calc(var(--row-h) - 10px);border-radius:5px;color:#fff;font-size:11px;line-height:calc(var(--row-h) - 10px);padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2;box-shadow:0 1px 2px rgba(0,0,0,.15)}
@@ -100,9 +100,15 @@ body.admin .bar{cursor:grab;touch-action:none}
 body.admin .bar:hover .h{display:block}
 body.admin .bar.drag{cursor:grabbing;opacity:1!important;outline:2px solid #1d2733;z-index:6}
 body.admin .bar.drag .h{display:block}
-.row.moved .lrow .c-sh,.row.moved .lrow .c-fi{color:var(--accent);font-weight:700}
+.row.moved .lrow .c-sh,.row.moved .lrow .c-fi,.row.moved .lrow .c-dy{color:var(--accent);font-weight:700}
 .toast button{margin-left:12px;background:var(--accent);color:#fff;border:0;border-radius:999px;padding:3px 12px;cursor:pointer}
 .msg{font-size:13px;color:var(--danger);margin-top:8px;min-height:18px}
+.savebar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:70;display:none;align-items:center;gap:10px;background:#fff7ec;border:2px solid var(--accent);color:#7a3d00;padding:8px 10px 8px 16px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.18);font-weight:500;white-space:nowrap;max-width:calc(100vw - 24px);flex-wrap:wrap}
+.savebar.show{display:flex}
+.savebar .btn.save{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700}
+.row.pending .lrow{background:#fff7ec}
+.row.pending .bar{outline:2px dashed #1d2733;outline-offset:1px}
+body.has-pending .toast{bottom:80px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1d2733;color:#fff;padding:10px 18px;border-radius:999px;z-index:80;display:none;font-size:14px}
 .loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);background:rgba(255,255,255,.7);z-index:20}
 .adminonly{display:none}
@@ -111,7 +117,7 @@ body.admin .adminonly{display:inline-block}
 .print-head,.print-foot,.wm{display:none}
 @media (max-width:760px){
   :root{--left-w:250px}
-  .c-no,.c-si,.c-sh,.c-fi{display:none}
+  .c-no,.c-si,.c-sh,.c-fi,.c-dy{display:none}
   .toolbar input[type=search]{width:100%}
   .ttl h1{font-size:16px}
   .form{grid-template-columns:1fr}
@@ -119,7 +125,7 @@ body.admin .adminonly{display:inline-block}
 @media print{
   @page{size:A3 landscape;margin:10mm}
   body{background:#fff;display:block;height:auto}
-  header,.toolbar,.banner,.legend .noprint,#tip,.toast{display:none!important}
+  header,.toolbar,.banner,.legend .noprint,#tip,.toast,.savebar{display:none!important}
   .wrap{padding:0;display:block}
   .gantt{overflow:visible;border:0;border-radius:0}
   .ghead,.lhead,.lrow{position:static}
@@ -177,6 +183,9 @@ body.admin .adminonly{display:inline-block}
 <div class="mask" id="mDlg"><div class="dlg" id="dlg"></div></div>
 <div id="tip"></div>
 <div class="toast" id="toast"></div>
+<div class="savebar" id="saveBar">⚠ 有 <b id="pendCnt">0</b> 筆排程修改<b>尚未存檔</b>
+  <button class="btn" onclick="discardPending()">放棄修改</button>
+  <button class="btn save" id="btnSaveAll" onclick="savePending()">💾 存檔</button></div>
 
 <script>
 /* ======================= 設定區 ======================= */
@@ -198,13 +207,14 @@ const DEMO = !CONFIG.API_URL;
 const PALETTE = ['#2f6fb5','#e07b39','#3a9a6a','#8e5bb5','#c4453c','#1f9aa8','#b8892a','#5868c8','#d0598f','#6b7f2a','#7a5a45','#4a90a4','#0e7c61','#a3487a','#3d5a80','#9c6b1f'];
 const MON_W = 64, WK_W = 24, DAY = 864e5;
 
-let S = { items:[], holidays:[], scale:'m', admin:false, pin:'', colorMap:{}, drag:null, undo:null };
+let S = { items:[], holidays:[], scale:'m', admin:false, pin:'', colorMap:{}, drag:null, undo:null, pending:new Map() };   // pending：拖拉後還沒存檔的資料
 
 /* ---------- 日期工具（全部用 UTC 的「天數」計算，避免時區誤差） ---------- */
 const dn = s => { if(!s) return NaN; const [y,m,d] = s.split('-').map(Number); return Date.UTC(y,m-1,d)/DAY; };
 const ds = n => new Date(n*DAY).toISOString().slice(0,10);
 const todayStr = () => { const t = new Date(); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; };
 const fmt = s => s ? s.replace(/-/g,'/') : '';
+const spanDays = (s,f) => { const n = dn(f) - dn(s) + 1; return isFinite(n) ? n : ''; };   // 天數：含頭含尾
 const daysInMonth = (y,m) => new Date(Date.UTC(y,m+1,0)).getUTCDate();
 
 /* ---------- 資料存取 ---------- */
@@ -230,16 +240,25 @@ function demoApi(action, p){
   else if (action==='add'){ const o={...p.item,id:'G'+Date.now()}; if(!o.no) o.no=String(db.items.reduce((m,x)=>Math.max(m,+x.no||0),0)+1); db.items.push(o); res={ok:true,item:o}; }
   else if (action==='update'){ const i=db.items.findIndex(x=>x.id===p.item.id); if(i<0) res={ok:false,error:'找不到這筆資料'}; else db.items[i]={...db.items[i],...p.item}; }
   else if (action==='delete'){ const i=db.items.findIndex(x=>x.id===p.id); if(i>=0) db.items.splice(i,1); }
+  else if (action==='batch'){ p.items.forEach(it=>{ const i=db.items.findIndex(x=>x.id===it.id); if(i>=0) db.items[i]={...db.items[i],...it}; }); }
   demoSave(db);
   return Promise.resolve(JSON.parse(JSON.stringify(res)));
 }
 
+/* 依出貨日排序（同一天再看預計完成日），項次自動重編 1、2、3… */
+function renumber(){
+  [...S.items].sort((a,b) => (a.ship||'').localeCompare(b.ship||'') || (a.finish||'').localeCompare(b.finish||'') || (+a.no||0)-(+b.no||0) || String(a.id).localeCompare(String(b.id)))
+    .forEach((x,i) => x.no = i + 1);
+}
 async function load(){
   $('#loading') && ($('#loading').style.display='flex');
   try{
     const r = await api('list');
     if (!r.ok) throw new Error(r.error);
     S.items = r.items.map(x => ({...x, no: x.no===''?'':Number(x.no)}));
+    // 還沒存檔的拖拉修改，重新抓資料後要保留在畫面上
+    S.pending.forEach((p,id) => { const it = S.items.find(i => i.id === id); if (it){ it.ship = p.after.ship; it.finish = p.after.finish; } else S.pending.delete(id); });
+    renumber(); updateSaveBar();
     S.holidays = r.holidays || [];
     buildFilters(); render();
   }catch(e){
@@ -266,7 +285,7 @@ function filtered(){
     if (yr && !(x.ship.slice(0,4) <= yr && (x.finish||x.ship).slice(0,4) >= yr)) return false;
     if (q && ![x.wo,x.customer,x.site,x.equip,x.note].join(' ').toLowerCase().includes(q)) return false;
     return true;
-  }).sort((a,b) => (a.ship||'').localeCompare(b.ship||'') || (a.no||0)-(b.no||0));
+  }).sort((a,b) => (a.no||0)-(b.no||0));
 }
 
 /* ---------- 時間軸 ---------- */
@@ -346,15 +365,15 @@ function render(fitWidth){
     const x1 = ax.pos(bad ? f : s), x2 = ax.pos((bad ? s : f) + 1);
     const col = S.colorMap[x.customer] || PALETTE[0];
     const past = f < T;
-    return `<div class="row ${past?'past':''}" data-id="${esc(x.id)}">
-      <div class="lrow"><div class="c-no">${esc(x.no)}</div><div class="c-wo">${esc(x.wo)}</div><div class="c-cu">${esc(x.customer)}</div><div class="c-si">${esc(x.site)}</div><div class="c-eq" title="${esc(x.equip)}">${esc(x.equip)}${x.note?' 📝':''}</div><div class="c-sh">${fmt(x.ship)}</div><div class="c-fi">${fmt(x.finish)}</div></div>
+    return `<div class="row ${past?'past':''} ${S.pending.has(x.id)?'pending moved':''}" data-id="${esc(x.id)}">
+      <div class="lrow"><div class="c-no">${esc(x.no)}</div><div class="c-wo">${esc(x.wo)}</div><div class="c-cu">${esc(x.customer)}</div><div class="c-si">${esc(x.site)}</div><div class="c-eq" title="${esc(x.equip)}">${esc(x.equip)}${x.note?' 📝':''}</div><div class="c-sh">${fmt(x.ship)}</div><div class="c-fi">${fmt(x.finish)}</div><div class="c-dy">${spanDays(x.ship,x.finish)}</div></div>
       <div class="tl" style="width:${ax.width}px"><div class="bar ${bad?'bad':''}" style="left:${x1}px;width:${Math.max(4,x2-x1)}px;background:${col}" data-bar="${esc(x.id)}"><span class="h l"></span>${x2-x1>50?esc(x.equip):''}<span class="h r"></span></div></div>
     </div>`;
   }).join('');
 
   g.innerHTML = `<div class="ginner" style="width:calc(var(--left-w) + ${ax.width}px)">
     <div class="ghead">
-      <div class="lhead"><div class="c-no" style="padding-bottom:6px">項次</div><div class="c-wo" style="padding-bottom:6px">工令</div><div class="c-cu" style="padding-bottom:6px">客戶</div><div class="c-si" style="padding-bottom:6px">廠別</div><div class="c-eq" style="padding-bottom:6px">設備名稱</div><div class="c-sh" style="padding-bottom:6px">出貨日</div><div class="c-fi" style="padding-bottom:6px">預計完成日</div></div>
+      <div class="lhead"><div class="c-no" style="padding-bottom:6px">項次</div><div class="c-wo" style="padding-bottom:6px">工令</div><div class="c-cu" style="padding-bottom:6px">客戶</div><div class="c-si" style="padding-bottom:6px">廠別</div><div class="c-eq" style="padding-bottom:6px">設備名稱</div><div class="c-sh" style="padding-bottom:6px">出貨日</div><div class="c-fi" style="padding-bottom:6px">預計完成日</div><div class="c-dy" style="padding-bottom:6px">天數</div></div>
       <div class="tl-head" style="width:${ax.width}px"><div class="tier y">${tier1}</div><div class="tier">${tier2}</div></div>
     </div>
     <div class="rows">
@@ -389,8 +408,8 @@ document.addEventListener('mousemove', e => {
   const b = e.target.closest('[data-bar]'), h = e.target.closest('[data-tip]');
   if (b){
     const x = S.items.find(i => i.id === b.dataset.bar); if (!x) return;
-    const days = dn(x.finish) - dn(x.ship);
-    tip.innerHTML = `<b>${esc(x.customer)}｜${esc(x.equip)}</b><br>工令：${esc(x.wo)||'—'}　廠別：${esc(x.site)||'—'}<br>出貨日：${fmt(x.ship)}<br>預計完成日：${fmt(x.finish)}（${isFinite(days)?days:'?'} 天）${x.note?'<br>📝 '+esc(x.note).slice(0,80):''}`;
+    const days = spanDays(x.ship, x.finish);
+    tip.innerHTML = `<b>${esc(x.customer)}｜${esc(x.equip)}</b><br>項次：${esc(x.no)}　工令：${esc(x.wo)||'—'}　廠別：${esc(x.site)||'—'}<br>出貨日：${fmt(x.ship)}<br>預計完成日：${fmt(x.finish)}（共 ${days===''?'?':days} 天）${x.note?'<br>📝 '+esc(x.note).slice(0,80):''}`;
   } else if (h){ tip.innerHTML = '🎌 ' + esc(h.dataset.tip).replace(/\n/g,'<br>🎌 '); }
   else { tip.style.display='none'; return; }
   tip.style.display = 'block';
@@ -423,7 +442,7 @@ function editItem(id){
   const opts = k => [...new Set(S.items.map(i=>i[k]).filter(Boolean))].map(v=>`<option value="${esc(v)}">`).join('');
   openDlg(`<h2>${id?'✏ 修改排程':'＋ 新增排程'}<button class="x" onclick="closeDlg()">×</button></h2>
    <div class="bd"><div class="form" id="fm">
-    <label>項次<input name="no" type="number" value="${esc(x.no)}" placeholder="空白=自動編號"></label>
+    <label>項次（依出貨日自動編號）<input value="${id?esc(x.no):'存檔後自動產生'}" disabled style="background:#f3f5f8"></label>
     <label>工令<input name="wo" value="${esc(x.wo)}"></label>
     <label>客戶名稱 <span class="req">*必填</span><input name="customer" list="dlCu" value="${esc(x.customer)}"></label>
     <label>廠別<input name="site" list="dlSi" value="${esc(x.site)}"></label>
@@ -443,6 +462,7 @@ function editItem(id){
     try{
       const r = await api(id?'update':'add', {item: id ? {...f, id} : f});
       if (!r.ok) throw new Error(r.error);
+      if (id) S.pending.delete(id);
       closeDlg(); toast('✅ 已儲存，大家重新整理就看得到'); await load();
     }catch(e){ $('#fMsg').textContent = '儲存失敗：' + e.message; $('#btnSave').disabled = false; $('#btnSave').textContent = '💾 儲存'; }
   };
@@ -451,12 +471,14 @@ function editItem(id){
 async function delItem(id){
   const x = S.items.find(i => i.id === id);
   if (!confirm(`確定要刪除「${x.customer}｜${x.equip}」嗎？\n刪除後無法復原。`)) return;
-  try{ const r = await api('delete',{id}); if (!r.ok) throw new Error(r.error); closeDlg(); toast('🗑 已刪除'); await load(); }
+  try{ const r = await api('delete',{id}); if (!r.ok) throw new Error(r.error); S.pending.delete(id); closeDlg(); toast('🗑 已刪除'); await load(); }
   catch(e){ alert('刪除失敗：' + e.message); }
 }
 
 /* ---------- 管理員登入 ---------- */
 function loginDlg(){
+  if (S.admin && S.pending.size && !confirm(`還有 ${S.pending.size} 筆修改沒存檔，登出會放棄這些修改。確定要登出嗎？`)) return;
+  if (S.admin && S.pending.size){ S.pending.forEach((p,id) => { const it = S.items.find(i => i.id === id); if (it){ it.ship = p.orig.ship; it.finish = p.orig.finish; } }); S.pending.clear(); renumber(); render(); updateSaveBar(); }
   if (S.admin){ S.admin=false; S.pin=''; document.body.classList.remove('admin'); $('#btnAdmin').textContent='🔒 管理員登入'; $('#btnAdmin').classList.remove('on'); toast('已登出'); return; }
   openDlg(`<h2>🔒 管理員登入<button class="x" onclick="closeDlg()">×</button></h2>
    <div class="bd"><div class="form">
@@ -472,7 +494,7 @@ function loginDlg(){
       if (!r.ok) throw new Error(r.error);
       S.admin = true; document.body.classList.add('admin');
       $('#btnAdmin').textContent = '🔓 管理員（登出）'; $('#btnAdmin').classList.add('on');
-      closeDlg(); toast('✅ 已登入：可直接拖拉色條，或點一列修改');
+      closeDlg(); toast('✅ 已登入：拖拉色條後，記得按下方「💾 存檔」');
     }catch(e){ S.pin=''; $('#lMsg').textContent = e.message; }
   };
 }
@@ -504,8 +526,9 @@ $('#gantt').addEventListener('pointermove', e => {
   D.bar.style.left = a + 'px'; D.bar.style.width = Math.max(4, b - a) + 'px';
   D.row.querySelector('.lrow .c-sh').textContent = fmt(ds(D.ns));
   D.row.querySelector('.lrow .c-fi').textContent = fmt(ds(D.nf));
+  D.row.querySelector('.lrow .c-dy').textContent = D.nf - D.ns + 1;
   const tip = $('#tip');
-  tip.innerHTML = `<b>${esc(D.x.equip)}</b><br>出貨日：${fmt(ds(D.ns))}<br>預計完成日：${fmt(ds(D.nf))}（${D.nf-D.ns} 天）`;
+  tip.innerHTML = `<b>${esc(D.x.equip)}</b><br>出貨日：${fmt(ds(D.ns))}<br>預計完成日：${fmt(ds(D.nf))}（共 ${D.nf-D.ns+1} 天）`;
   tip.style.display = 'block'; tip.style.left = (e.clientX + 14) + 'px'; tip.style.top = (e.clientY + 18) + 'px';
 });
 async function endDrag(){
@@ -516,27 +539,53 @@ async function endDrag(){
   if (D.ns === D.s && D.nf === D.f){ render(); return; }
   const before = {...D.x};
   const after = {...D.x, ship: ds(D.ns), finish: ds(D.nf)};
-  await saveDates(before, after, true);
+  setDates(before, after, true);
 }
 $('#gantt').addEventListener('pointerup', endDrag);
 $('#gantt').addEventListener('pointercancel', endDrag);
 
-async function saveDates(before, after, canUndo){
-  Object.assign(S.items.find(i => i.id === after.id) || {}, after);
-  render();
-  try{
-    const r = await api('update', {item: after});
-    if (!r.ok) throw new Error(r.error);
-    if (canUndo){
-      S.undo = before;
-      toast(`✅ ${esc(after.equip)}：${fmt(after.ship)} → ${fmt(after.finish)}　<button onclick="undoDrag()">復原</button>`, 6000, true);
-    } else toast('↩ 已復原');
-  }catch(e){
-    Object.assign(S.items.find(i => i.id === after.id) || {}, before); render();
-    alert('儲存失敗，已還原：' + e.message);
+/* 拖拉後先記在「待存檔」清單，按 💾 存檔 才真的寫進 Google 試算表 */
+function setDates(before, after, canUndo){
+  const it = S.items.find(i => i.id === after.id); if (!it) return;
+  const orig = S.pending.has(it.id) ? S.pending.get(it.id).orig : {ship: before.ship, finish: before.finish};
+  it.ship = after.ship; it.finish = after.finish;
+  if (it.ship === orig.ship && it.finish === orig.finish) S.pending.delete(it.id);     // 拖回原位 = 沒有修改
+  else S.pending.set(it.id, {orig, after:{ship:it.ship, finish:it.finish}});
+  renumber(); render(); updateSaveBar();
+  if (canUndo){
+    S.undo = {id: it.id, ship: before.ship, finish: before.finish};
+    toast(`${esc(it.equip)}：${fmt(it.ship)} → ${fmt(it.finish)}（尚未存檔）　<button onclick="undoDrag()">復原</button>`, 5000, true);
   }
 }
-function undoDrag(){ const u = S.undo; S.undo = null; if (u) saveDates({...S.items.find(i=>i.id===u.id)}, u, false); }
+function undoDrag(){ const u = S.undo; S.undo = null; if (!u) return; const it = S.items.find(i => i.id === u.id); if (it){ setDates({...it}, {...it, ship:u.ship, finish:u.finish}, false); toast('↩ 已復原'); } }
+function updateSaveBar(){
+  const n = S.pending.size;
+  $('#pendCnt').textContent = n;
+  $('#saveBar').classList.toggle('show', n > 0);
+  document.body.classList.toggle('has-pending', n > 0);
+}
+async function savePending(){
+  if (!S.pending.size) return;
+  const btn = $('#btnSaveAll'); btn.disabled = true; btn.textContent = '存檔中…';
+  const items = [...S.pending.keys()].map(id => S.items.find(i => i.id === id)).filter(Boolean)
+    .map(x => ({id:x.id, wo:x.wo, customer:x.customer, site:x.site, equip:x.equip, ship:x.ship, finish:x.finish, note:x.note}));
+  try{
+    const r = await api('batch', {items});
+    if (!r.ok) throw new Error(r.error);
+    S.pending.clear(); updateSaveBar();
+    toast(`✅ 已存檔 ${items.length} 筆，大家重新整理就看得到`);
+    await load();
+  }catch(e){ alert('存檔失敗：' + e.message + '\n修改還留在畫面上，請稍後再按一次「存檔」。'); }
+  finally{ btn.disabled = false; btn.textContent = '💾 存檔'; }
+}
+function discardPending(){
+  if (!S.pending.size) return;
+  if (!confirm(`確定要放棄 ${S.pending.size} 筆還沒存檔的修改嗎？\n色條會回到原本的日期。`)) return;
+  S.pending.forEach((p,id) => { const it = S.items.find(i => i.id === id); if (it){ it.ship = p.orig.ship; it.finish = p.orig.finish; } });
+  S.pending.clear(); S.undo = null; renumber(); render(); updateSaveBar(); toast('已放棄修改');
+}
+// 有沒存檔的修改時，關掉或離開網頁會先提醒
+window.addEventListener('beforeunload', e => { if (S.pending.size){ e.preventDefault(); e.returnValue = ''; } });
 
 /* ---------- 匯出 Excel ---------- */
 function loadScript(src){ return new Promise((ok,ng)=>{ const s=document.createElement('script'); s.src=src; s.onload=ok; s.onerror=ng; document.head.appendChild(s); }); }
@@ -547,8 +596,8 @@ async function exportXlsx(){
   catch(e){ return alert('Excel 元件下載失敗，請確認網路'); }
   const keep = S.scale; S.scale = 'm'; const ax = makeAxis(list); S.scale = keep;
   const wb = new ExcelJS.Workbook(); wb.creator = '鴻睿自動化 生管課';
-  const ws = wb.addWorksheet('甘特圖', {views:[{state:'frozen', xSplit:7, ySplit:4}]});
-  const nCol = 7 + ax.cols.length;
+  const ws = wb.addWorksheet('甘特圖', {views:[{state:'frozen', xSplit:8, ySplit:4}]});
+  const FIX = 8, nCol = FIX + ax.cols.length;   // 前 8 欄是文字欄位，第 9 欄開始是月份
   const logoId = wb.addImage({base64: LOGO_DATA, extension:'png'});
   ws.addImage(logoId, {tl:{col:0.1, row:0.1}, ext:{width:62, height:48}});
   ws.getRow(1).height = 26; ws.getRow(2).height = 18;
@@ -559,29 +608,30 @@ async function exportXlsx(){
   // 第 3 列：年、第 4 列：月份；左邊 7 個欄名把第 3、4 列合併置中
   const FONT = '微軟正黑體', HEAD_BG = 'FF595959', YEAR_LINE = {style:'medium', color:{argb:'FF1F3A5F'}}, ROW3_LINE = {style:'medium', color:{argb:'FF000000'}};
   const solid = argb => ({type:'pattern', pattern:'solid', fgColor:{argb}});
-  ['項次','工令','客戶名稱','廠別','設備名稱','出貨日','預計完成日'].forEach((h,i) => { ws.mergeCells(3, i+1, 4, i+1); ws.getCell(3, i+1).value = h; });
-  ax.cols.forEach((c,i) => ws.getCell(4, 8+i).value = c.m+1);
-  let ystart = 8;
+  ['項次','工令','客戶名稱','廠別','設備名稱','出貨日','預計完成日','天數'].forEach((h,i) => { ws.mergeCells(3, i+1, 4, i+1); ws.getCell(3, i+1).value = h; });
+  ax.cols.forEach((c,i) => ws.getCell(4, FIX+1+i).value = c.m+1);
+  let ystart = FIX + 1;
   ax.years.forEach(y => { const n = Math.round(y.w / ax.cols[0].w); ws.getCell(3, ystart).value = y.label; y.c1 = ystart; y.c2 = ystart+n-1; ystart += n; });
   ws.getRow(3).height = 20; ws.getRow(4).height = 20;
   // 表頭：淺藍底白字；前 7 格（合併）不加任何框線 → 不會有白線；只有第 4 列月份之間留白色細線
   [3,4].forEach(r => { for (let i=1;i<=nCol;i++){ const c = ws.getCell(r,i); c.font = {name:FONT, bold:true, color:{argb:'FFFFFFFF'}}; c.fill = solid(HEAD_BG); c.alignment = {horizontal:'center', vertical:'middle'}; c.border = {}; } });
-  for (let i=9;i<=nCol;i++) ws.getCell(4,i).border = {left:{style:'thin', color:{argb:'FFFFFFFF'}}};
-  ax.cols.forEach((c,i) => { if (c.hols.length){ const cell = ws.getCell(4, 8+i); cell.border = {...cell.border, bottom:{style:'thick', color:{argb:'FFE67E22'}}}; cell.note = c.hols.map(h=>ds(h.d)+' '+h.name).join('\n'); } });
+  for (let i=FIX+2;i<=nCol;i++) ws.getCell(4,i).border = {left:{style:'thin', color:{argb:'FFFFFFFF'}}};
+  ax.cols.forEach((c,i) => { if (c.hols.length){ const cell = ws.getCell(4, FIX+1+i); cell.border = {...cell.border, bottom:{style:'thick', color:{argb:'FFE67E22'}}}; cell.note = c.hols.map(h=>ds(h.d)+' '+h.name).join('\n'); } });
   list.forEach((x,ri) => {
     const r = ws.getRow(5+ri);
-    r.values = [x.no===''?'':Number(x.no), x.wo?(isNaN(x.wo)?x.wo:Number(x.wo)):'', x.customer, x.site, x.equip, x.ship?new Date(dn(x.ship)*DAY):'', x.finish?new Date(dn(x.finish)*DAY):''];
+    r.values = [x.no===''?'':Number(x.no), x.wo?(isNaN(x.wo)?x.wo:Number(x.wo)):'', x.customer, x.site, x.equip, x.ship?new Date(dn(x.ship)*DAY):'', x.finish?new Date(dn(x.finish)*DAY):'', spanDays(x.ship,x.finish)];
+    r.getCell(8).alignment = {horizontal:'right'};
     r.getCell(6).numFmt = r.getCell(7).numFmt = 'yyyy/mm/dd';
     if (x.note) r.getCell(5).note = '備註：' + x.note;
     const s = dn(x.ship), f = dn(x.finish||x.ship), argb = 'FF' + (S.colorMap[x.customer]||'#2f6fb5').slice(1).toUpperCase();
     ax.cols.forEach((c,i) => {
-      const cell = r.getCell(8+i);
+      const cell = r.getCell(FIX+1+i);
       if (s < c.end && f >= c.start) cell.fill = solid(argb);
       cell.border = {left:{style:'hair',color:{argb:'FFDFE4EA'}}};
     });
   });
   const lastRow = 4 + list.length;
-  // 每一年一個大粗框：從第 3 列框到最後一筆資料（例：2026 年 = H3 ～ 最後一列），框內不加粗線
+  // 每一年一個大粗框：從第 3 列框到最後一筆資料（例：2026 年 = I3 ～ 最後一列），框內不加粗線
   ax.years.forEach(y => {
     for (let i=y.c1; i<=y.c2; i++) ws.getCell(3, i).alignment = {horizontal:'centerContinuous', vertical:'middle'};
     for (let r=3; r<=lastRow; r++) for (let i=y.c1; i<=y.c2; i++){
@@ -598,7 +648,7 @@ async function exportXlsx(){
   [1,2].forEach(r => { for (let i=1;i<=nCol;i++) ws.getCell(r,i).fill = solid('FFFFFFFF'); });
   // 全部改成微軟正黑體
   for (let r=1;r<=lastRow;r++) for (let i=1;i<=nCol;i++){ const c = ws.getCell(r,i); c.font = {...(c.font||{}), name:FONT}; }
-  ws.columns.forEach((c,i) => c.width = [6,9,10,8,22,13.5,13.5][i] || 5);
+  ws.columns.forEach((c,i) => c.width = [6,9,10,8,22,13.5,13.5,7][i] || 5);
   ws.addRow([]);
   ws.addRow(['※ 月份下方橘色粗線 = 該月有國定假日（滑鼠移到月份上可看日期）；色塊依客戶分色；粗框 = 一個年度。']).font = {name:FONT, size:9, color:{argb:'FF6B7785'}};
   ws.pageSetup = {paperSize:8, orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, printTitlesRow:'3:4', margins:{left:.3,right:.3,top:.5,bottom:.5,header:.2,footer:.2}};
@@ -607,7 +657,7 @@ async function exportXlsx(){
   // 第二張：明細＋備註
   const ws2 = wb.addWorksheet('明細與備註');
   ws2.addRow(['項次','工令','客戶名稱','廠別','設備名稱','出貨日','預計完成日','天數','備註']);
-  list.forEach(x => ws2.addRow([x.no, x.wo, x.customer, x.site, x.equip, fmt(x.ship), fmt(x.finish), dn(x.finish)-dn(x.ship), x.note]));
+  list.forEach(x => ws2.addRow([x.no, x.wo, x.customer, x.site, x.equip, fmt(x.ship), fmt(x.finish), spanDays(x.ship,x.finish), x.note]));
   ws2.eachRow(row => row.eachCell(c => c.font = {name:FONT}));
   ws2.getRow(1).eachCell(c => { c.font={name:FONT, bold:true, color:{argb:'FFFFFFFF'}}; c.fill=solid(HEAD_BG); c.alignment={horizontal:'center'}; });
   ws2.columns.forEach((c,i) => c.width = [6,9,10,8,24,12,12,7,40][i]);
@@ -627,7 +677,7 @@ function doPrint(){
   $('#pFilter').textContent = '篩選條件：' + filterText();
   const wm = $('#wm'); wm.innerHTML = '';
   for (let r=0;r<8;r++) for (let c=0;c<5;c++) wm.innerHTML += `<span style="top:${r*14}%;left:${c*24-5}%">鴻睿自動化 HR</span>`;
-  render(1480 - 600);           // A3 橫式可用寬度約 1480px，扣掉左邊欄位
+  render(1480 - 654);           // A3 橫式可用寬度約 1480px，扣掉左邊欄位
   setTimeout(() => { window.print(); render(); }, 300);
 }
 
@@ -644,14 +694,14 @@ $('#btnAdmin').onclick = loginDlg;
 $('#btnAdd').onclick = () => editItem(null);
 $('#btnXlsx').onclick = exportXlsx;
 $('#btnPrint').onclick = doPrint;
-$('#btnReload').onclick = () => load().then(()=>toast('已更新為最新資料'));
+$('#btnReload').onclick = () => load().then(()=>toast(S.pending.size ? '已更新（你還沒存檔的修改仍保留著）' : '已更新為最新資料'));
 
 /* ---------- 啟動 ---------- */
 ['#logo','#logoP'].forEach(s => $(s).innerHTML = `<img src="${esc(CONFIG.LOGO_URL || LOGO_DATA)}" alt="HR LOGO">`);
 document.head.insertAdjacentHTML('beforeend', `<link rel="icon" href="${LOGO_DATA}">`);
 if (DEMO) showBanner('🧪 目前是<b>示範模式</b>：資料只存在這台電腦，別人看不到。把 Google Apps Script 網址貼到 CONFIG.API_URL 後就會變成雲端共用版。示範密碼：0000（正式版密碼只存在 Google 後台，網頁原始碼看不到）');
 load().then(() => setTimeout(scrollToToday, 50));
-setInterval(() => { if (!document.hidden && !S.drag && !$('#mDlg').classList.contains('show')) load(); }, 5*60*1000);   // 每 5 分鐘自動更新
+setInterval(() => { if (!document.hidden && !S.drag && !S.pending.size && !$('#mDlg').classList.contains('show')) load(); }, 5*60*1000);   // 每 5 分鐘自動更新
 </script>
 </body>
 </html>
