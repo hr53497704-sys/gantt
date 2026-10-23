@@ -553,16 +553,21 @@ async function exportXlsx(){
   ws.addImage(logoId, {tl:{col:0.1, row:0.1}, ext:{width:62, height:48}});
   ws.getRow(1).height = 26; ws.getRow(2).height = 18;
   ws.mergeCells(1,3,1,nCol); ws.getCell(1,3).value = '鴻睿自動化股份有限公司　主設備排程甘特圖';
-  ws.getCell(1,3).font = {size:16, bold:true, color:{argb:'FF1F3A5F'}};
+  ws.getCell(1,3).font = {name:'微軟正黑體', size:16, bold:true, color:{argb:'FF1F3A5F'}};
   ws.mergeCells(2,3,2,nCol); ws.getCell(2,3).value = `匯出日期：${todayStr()}　篩選：${filterText()}　共 ${list.length} 筆`;
-  ws.getCell(2,3).font = {size:10, color:{argb:'FF6B7785'}};
-  // 第 3 列：年、第 4 列：欄名＋月份
-  const head = ['項次','工令','客戶名稱','廠別','設備名稱','出貨日','預計完成日', ...ax.cols.map(c=>(c.m+1)+'月')];
-  ws.getRow(4).values = head;
+  ws.getCell(2,3).font = {name:'微軟正黑體', size:10, color:{argb:'FF6B7785'}};
+  // 第 3 列：年、第 4 列：月份；左邊 7 個欄名把第 3、4 列合併置中
+  const FONT = '微軟正黑體', HEAD_BG = 'FF595959', YEAR_LINE = {style:'medium', color:{argb:'FF1F3A5F'}}, ROW3_LINE = {style:'medium', color:{argb:'FF000000'}};
+  const solid = argb => ({type:'pattern', pattern:'solid', fgColor:{argb}});
+  ['項次','工令','客戶名稱','廠別','設備名稱','出貨日','預計完成日'].forEach((h,i) => { ws.mergeCells(3, i+1, 4, i+1); ws.getCell(3, i+1).value = h; });
+  ax.cols.forEach((c,i) => ws.getCell(4, 8+i).value = c.m+1);
   let ystart = 8;
-  ax.years.forEach(y => { const n = Math.round(y.w / ax.cols[0].w); ws.mergeCells(3, ystart, 3, ystart+n-1); ws.getCell(3, ystart).value = y.label; ystart += n; });
-  [3,4].forEach(r => ws.getRow(r).eachCell({includeEmpty:true}, (c,i) => { if (i<=nCol){ c.font={bold:true,color:{argb:'FFFFFFFF'}}; c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1F3A5F'}}; c.alignment={horizontal:'center',vertical:'middle'}; } }));
-  ax.cols.forEach((c,i) => { if (c.hols.length){ const cell = ws.getCell(4, 8+i); cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE67E22'}}; cell.note = c.hols.map(h=>ds(h.d)+' '+h.name).join('\n'); } });
+  ax.years.forEach(y => { const n = Math.round(y.w / ax.cols[0].w); ws.getCell(3, ystart).value = y.label; y.c1 = ystart; y.c2 = ystart+n-1; ystart += n; });
+  ws.getRow(3).height = 20; ws.getRow(4).height = 20;
+  // 表頭：淺藍底白字；前 7 格（合併）不加任何框線 → 不會有白線；只有第 4 列月份之間留白色細線
+  [3,4].forEach(r => { for (let i=1;i<=nCol;i++){ const c = ws.getCell(r,i); c.font = {name:FONT, bold:true, color:{argb:'FFFFFFFF'}}; c.fill = solid(HEAD_BG); c.alignment = {horizontal:'center', vertical:'middle'}; c.border = {}; } });
+  for (let i=9;i<=nCol;i++) ws.getCell(4,i).border = {left:{style:'thin', color:{argb:'FFFFFFFF'}}};
+  ax.cols.forEach((c,i) => { if (c.hols.length){ const cell = ws.getCell(4, 8+i); cell.border = {...cell.border, bottom:{style:'thick', color:{argb:'FFE67E22'}}}; cell.note = c.hols.map(h=>ds(h.d)+' '+h.name).join('\n'); } });
   list.forEach((x,ri) => {
     const r = ws.getRow(5+ri);
     r.values = [x.no===''?'':Number(x.no), x.wo?(isNaN(x.wo)?x.wo:Number(x.wo)):'', x.customer, x.site, x.equip, x.ship?new Date(dn(x.ship)*DAY):'', x.finish?new Date(dn(x.finish)*DAY):''];
@@ -571,21 +576,40 @@ async function exportXlsx(){
     const s = dn(x.ship), f = dn(x.finish||x.ship), argb = 'FF' + (S.colorMap[x.customer]||'#2f6fb5').slice(1).toUpperCase();
     ax.cols.forEach((c,i) => {
       const cell = r.getCell(8+i);
-      if (s < c.end && f >= c.start) cell.fill = {type:'pattern',pattern:'solid',fgColor:{argb}};
+      if (s < c.end && f >= c.start) cell.fill = solid(argb);
       cell.border = {left:{style:'hair',color:{argb:'FFDFE4EA'}}};
     });
   });
-  ws.columns.forEach((c,i) => c.width = [6,9,10,8,22,12,12][i] || 5);
+  const lastRow = 4 + list.length;
+  // 每一年一個大粗框：從第 3 列框到最後一筆資料（例：2026 年 = H3 ～ 最後一列），框內不加粗線
+  ax.years.forEach(y => {
+    for (let i=y.c1; i<=y.c2; i++) ws.getCell(3, i).alignment = {horizontal:'centerContinuous', vertical:'middle'};
+    for (let r=3; r<=lastRow; r++) for (let i=y.c1; i<=y.c2; i++){
+      if (!(r===3 || r===lastRow || i===y.c1 || i===y.c2)) continue;
+      const cell = ws.getCell(r, i), bd = {...(cell.border||{})};
+      if (r === 3){ bd.top = ROW3_LINE; bd.bottom = ROW3_LINE; }      // 第 3 列年份：上下都粗框
+      if (r === lastRow) bd.bottom = YEAR_LINE;
+      if (i === y.c1) bd.left = r === 3 ? ROW3_LINE : YEAR_LINE;
+      if (i === y.c2) bd.right = r === 3 ? ROW3_LINE : YEAR_LINE;
+      cell.border = bd;
+    }
+  });
+  // LOGO 那兩列填白色 → 看不到格線
+  [1,2].forEach(r => { for (let i=1;i<=nCol;i++) ws.getCell(r,i).fill = solid('FFFFFFFF'); });
+  // 全部改成微軟正黑體
+  for (let r=1;r<=lastRow;r++) for (let i=1;i<=nCol;i++){ const c = ws.getCell(r,i); c.font = {...(c.font||{}), name:FONT}; }
+  ws.columns.forEach((c,i) => c.width = [6,9,10,8,22,13.5,13.5][i] || 5);
   ws.addRow([]);
-  ws.addRow(['※ 橘色月份 = 該月有國定假日（滑鼠移到月份上可看日期）；色塊依客戶分色。']).font = {size:9,color:{argb:'FF6B7785'}};
+  ws.addRow(['※ 月份下方橘色粗線 = 該月有國定假日（滑鼠移到月份上可看日期）；色塊依客戶分色；粗框 = 一個年度。']).font = {name:FONT, size:9, color:{argb:'FF6B7785'}};
   ws.pageSetup = {paperSize:8, orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, printTitlesRow:'3:4', margins:{left:.3,right:.3,top:.5,bottom:.5,header:.2,footer:.2}};
   ws.headerFooter.oddHeader = '&L&B鴻睿自動化股份有限公司&R主設備排程甘特圖';
   ws.headerFooter.oddFooter = '&L鴻睿自動化 內部文件・未經同意請勿外流&R第 &P / &N 頁';
   // 第二張：明細＋備註
   const ws2 = wb.addWorksheet('明細與備註');
   ws2.addRow(['項次','工令','客戶名稱','廠別','設備名稱','出貨日','預計完成日','天數','備註']);
-  ws2.getRow(1).eachCell(c => { c.font={bold:true,color:{argb:'FFFFFFFF'}}; c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1F3A5F'}}; });
   list.forEach(x => ws2.addRow([x.no, x.wo, x.customer, x.site, x.equip, fmt(x.ship), fmt(x.finish), dn(x.finish)-dn(x.ship), x.note]));
+  ws2.eachRow(row => row.eachCell(c => c.font = {name:FONT}));
+  ws2.getRow(1).eachCell(c => { c.font={name:FONT, bold:true, color:{argb:'FFFFFFFF'}}; c.fill=solid(HEAD_BG); c.alignment={horizontal:'center'}; });
   ws2.columns.forEach((c,i) => c.width = [6,9,10,8,24,12,12,7,40][i]);
   const buf = await wb.xlsx.writeBuffer();
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
